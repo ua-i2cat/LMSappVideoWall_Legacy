@@ -8,7 +8,7 @@ LiveMediaStreamer web application example for SPLITT streaming
         git clone https://github.com/ua-i2cat/LMSappVideoWall /path/to/LMSappVideoWall
         
 ##Requirements 
-1. [liveMediaStreamer](https://github.com/ua-i2cat/liveMediaStreamer/wiki) installed and running _This app it's working over splitter branch_
+1. [liveMediaStreamer](https://github.com/ua-i2cat/liveMediaStreamer/wiki) installed and running _((This app it's working over splitter branch.))_
 2. [LMStoREST](https://github.com/ua-i2cat/LMStoREST/wiki) installed and running
 3. HTTP server (e.g.: nginx) installed and running. 
 
