@@ -1,0 +1,33 @@
+<div class="row">
+    <div class="col-sm-12">
+      <h3>Now, set network protocol type input for LiveMediaStreamer instance</h3>
+    </div>
+  </div> 
+  <div class="row">
+    <div class="col-sm-12">
+      <div class="btn-group" role="group">
+  	    <button id="rtmpBtn" type="button" class="btn btn-default">RTMP</button>
+	    <button id="rtspBtn" type="button" class="btn btn-default">RTSP</button>
+	    <button id="rtpBtn" type="button" class="btn btn-default">RTP</button>
+      </div>
+    </div>
+  </div>    
+  <div class="row">
+    <div class="col-sm-12" id="inputParams">
+    </div>
+</div>
+<br><br>
+<script>
+	$('#rtmpBtn').on('click', function(event) {
+	  	event.preventDefault(); // To prevent following the link (optional)
+	    $("#inputParams").load("./app/views/inputViews/rtmp.html");
+	});
+	$('#rtspBtn').on('click', function(event) {
+	  	event.preventDefault(); // To prevent following the link (optional)
+	    $("#inputParams").load("./app/views/inputViews/rtsp.html");
+	});
+	$('#rtpBtn').on('click', function(event) {
+	  	event.preventDefault(); // To prevent following the link (optional)
+	    $("#inputParams").load("./app/views/inputViews/rtp.html");
+	});
+</script>

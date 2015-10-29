@@ -1,0 +1,81 @@
+<div class="row">
+  <div class="col-sm-12">
+    <h4>Set audio and video inputs</h4>
+  </div>
+</div>
+<div class="row">
+  <form id="setRTPavForm" class="form-horizontal" role="form">
+    <div class="col-sm-6">
+      <div class="row">
+        <div class="col-sm-3">
+          <h5>Port</h5>
+        </div>
+        <div class="col-sm-9">
+          <input type="numeric" class="form-control input-sm" name="video-port" placeholder="e.g.: 5004" required="true" autofocus>
+          <input type="hidden" name="rtpInput" value="av">
+        </div>
+      </div>
+      <div class = "row">&nbsp;</div>
+      <div class="row">
+        <div class="col-sm-12">
+          <select class="form-control" name="video-codec" required="true">
+            <option value="none">Codec</option>
+            <option value="H264">H264</option>
+            <option value="H265">H265</option>
+          </select>
+        </div>
+      </div>
+      <div class = "row">&nbsp;</div>
+      <div class = "row">&nbsp;</div>
+      <div class = "row">&nbsp;</div>
+      <div class = "row">&nbsp;</div>
+    </div>
+    <div class="col-sm-6">
+      <div class="row">
+        <div class="col-sm-3">
+          <h5>Port</h5>
+        </div>
+        <div class="col-sm-9">
+          <input type="numeric" class="form-control input-sm" name="audio-port" id="port" placeholder="e.g.: 5006" required="true">
+        </div>
+      </div>
+      <div class = "row">&nbsp;</div>
+      <div class="row">
+        <div class="col-sm-12">
+          <select class="form-control" name="audio-codec" required="true">
+            <option value="none">Codec</option>
+            <option value="pcm">PCM</option>
+            <option value="pcmu">PCMU</option>
+            <option value="opus">OPUS</option>
+            <option value="aac">AAC</option>
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-sm-12">
+          <select class="form-control" name="sampleRate" required="true">
+            <option value="none">Samplerate</option>
+            <option value="8000">8000</option>
+            <option value="44100">44100</option>
+            <option value="48000">48000</option>
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-sm-12">
+          <select class="form-control" name="channels" required="true">
+            <option value="none">Channels</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-sm-12">
+        <input type="submit" class="btn btn-default" value="Set and continue"></input>
+      </div>
+    </div>
+   </form>
+ <br>
+</div>

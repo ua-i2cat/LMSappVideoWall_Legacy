@@ -1,0 +1,111 @@
+<div class="row">
+	<div class="col-sm-3 col-sm-offset-1">
+		<div class="row">
+			<h3>Set Crops</h3>
+			<button type="button" class="btn btn-default" href="#crop_modal" data-toggle="modal">Create Crop</button>
+		</div>
+		<br>
+		<h4>Selected Crop</h4>
+		<form class="form-horizontal hidden" role="form" id="configureCropForm">
+			<div class="form-group">
+				<label class="col-sm-3 control-label">Crop</label>
+			    <div class="col-sm-7">	
+			    	<label  id="select-crop" class="form-control">
+			    </div>	
+			</div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label">X</label>
+			    <div class="col-sm-7">	
+			    	<label id="x-crop" class="form-control" ></label>
+			    </div>	
+			</div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label">Y</label>
+			    <div class="col-sm-7">	
+			    	<label id="y-crop" class="form-control"></label>
+			    </div>	
+			</div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label">Width</label>
+			    <div class="col-sm-7">	
+			    	<label id="width-crop" class="form-control"></label>
+			    </div>	
+			</div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label">Height</label>
+			    <div class="col-sm-7">	
+			    	<label id="height-crop" class="form-control"></label>
+			    </div>	
+			</div>
+			<div class="form-group"> 
+			    <input id="configureBtn" type="submit" class="btn btn-default" value="Configure Selected Crop">
+			</div>
+		</form>
+		<form class="form-horizontal hidden" role="form" id="deleteCrop">
+			<div class="form-group">
+				<input id="deleteCropBtn" type="submit" class="btn btn-default" value ="Delete Selected Crop">
+			</div>
+		</form>
+		<form class="form-horizontal hidden" role="form" id="configureAllCrops">
+			<div class="form-group">
+				<input id="configAllCropsBtn" type="submit" class="btn btn-default" value ="Configure All Crops">
+			</div>
+		</form>
+		<br>
+		<h4>Configure Frame Time</h4>
+		<form class="form-horizontal" role="form" id="configureFrameTimeForm">
+			<div class="form-group">
+				<label class="col-sm-3 control-label">Frame Time</label>
+			    <div class="col-sm-7">	
+			    	<input type="text" id="frame-time" class="form-control">
+			    </div>	
+			</div>
+			<div class="form-group"> 
+			    <input id="configureFrameTimeBtn" type="submit" class="btn btn-default" value="Configure Frame Time"></input>
+			</div>
+		</form>
+	</div>
+
+	<div class="col-sm-8" id="contentCrop">
+		Input screen
+		<div id="grid-snap">
+		</div>
+	</div>
+
+</div> 
+
+<div class="modal fade" id="crop_modal">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+			    <a class="close" data-dismiss="modal">&times;</a>
+			    <h3>New Crop</h3>
+			</div>
+			<div class="modal-body">
+			    <form class="form-horizontal" role="form" id="createCropForm">
+				    <div class="form-group">
+					    <div class="col-sm-3">
+					       	<h5>Crop Width</h5>
+					    </div>
+					    <div class="col-sm-9">
+					       	<input type="text" class="form-control" id='resolution-width' placeholder="e.g.: 1920" value="1920" required="true" autofocus>
+					    </div>
+				    </div>
+				    <div class="form-group">
+					     <div class="col-sm-3"> 
+					       	<h5>Crop Height</h5>
+					    </div>
+					    <div class="col-sm-9"> 
+					       	<input type="text" class="form-control" id='resolution-height' placeholder="e.g.: 1080" value="1080" required="true">
+					    </div>
+				    </div>
+				    <div class="form-group"> 
+					    <div class="col-sm-12">
+					    	<input id="createBtn" type="submit" class="btn btn-default" value="Create"></input>
+					    </div>
+					</div>
+		  		</form>
+			</div>
+		</div>	
+	</div>
+</div>

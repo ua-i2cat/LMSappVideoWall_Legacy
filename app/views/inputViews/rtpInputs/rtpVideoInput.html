@@ -1,0 +1,40 @@
+<div class="row">
+  <form id="setRTPvideoForm" class="form-horizontal" role="form">
+    <div class="col-sm-offset-3 col-sm-6">
+      <div class="row">
+        <div class="col-sm-12">
+          <h4>Set video input</h4>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-sm-3">
+          <h5>Port</h5>
+        </div>
+        <div class="col-sm-9">
+          <input type="numeric" class="form-control input-sm" name="port" placeholder="e.g.: 5004" required="true" autofocus>
+          <input type="hidden" name="rtpInput" value="v">
+        </div>
+      </div>
+      <div class = "row">&nbsp;</div>
+      <div class="row">
+        <div class="col-sm-12">
+          <select class="form-control" name="codec" required="true">
+            <option value="none">Codec</option>
+            <option value="H264">H264</option>
+            <option value="H265">H265</option>
+          </select>
+        </div>
+      </div>
+      <div class = "row">&nbsp;</div>
+      <div class = "row">&nbsp;</div>
+      <div class = "row">&nbsp;</div>
+      <div class = "row">&nbsp;</div>
+    </div>
+      <div class="row">
+        <div class="col-sm-12">
+          <input type="submit" class="btn btn-default" value="Set and continue"></input>
+        </div>
+      </div>
+    </form>
+  <br>
+</div>

@@ -1,0 +1,36 @@
+<div id="rtpInput">
+  <br>
+  <div class="row">
+    <div class="col-sm-offset-2 col-sm-8">
+      <h4>And set RTP input params</h4>
+    </div>
+  </div> 
+  <div class="row">
+    <div class="col-sm-12">
+      <div class="btn-group" role="group">
+        <button id="rtpAudioBtn" type="button" class="btn btn-default">Audio</button>
+        <button id="rtpVideoBtn" type="button" class="btn btn-default">Video</button>
+        <button id="rtpAVBtn" type="button" class="btn btn-default">Both</button>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-sm-12" id="rtpInputParams">
+    </div>
+  </div>
+  <div class="row">   
+</div>
+<script>
+  $('#rtpAudioBtn').on('click', function(event) {
+      event.preventDefault(); // To prevent following the link (optional)
+      $("#rtpInputParams").load("./app/views/inputViews/rtpInputs/rtpAudioInput.html");
+  });
+  $('#rtpVideoBtn').on('click', function(event) {
+      event.preventDefault(); // To prevent following the link (optional)
+      $("#rtpInputParams").load("./app/views/inputViews/rtpInputs/rtpVideoInput.html");
+  });
+  $('#rtpAVBtn').on('click', function(event) {
+      event.preventDefault(); // To prevent following the link (optional)
+      $("#rtpInputParams").load("./app/views/inputViews/rtpInputs/rtpAVinput.html");
+  });
+</script>
