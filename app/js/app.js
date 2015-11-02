@@ -46,7 +46,19 @@ $(document).ready( function() {
             case 'connectForm':
                 connectForm(form);
                 break;
+            case 'setRTMPForm':
+                setRTMPForm(form);
+                break;
+            case 'setRTSPForm':
+                setRTSPForm(form);
+                break;
             case 'setRTPvideoForm':
+                setRTPForm(form);
+                break;
+            case 'setRTPavForm':
+                setRTPForm(form);
+                break;
+            case 'setRTPaudioForm':
                 setRTPForm(form);
                 break;
             case 'createCropForm':
@@ -110,7 +122,12 @@ $(document).ready( function() {
         });
     });
 
-
+    window.addEventListener("beforeunload", function(event){
+        event  = event || window.event;
+        var reloadMessage = "\tALERT: If you refresh this page, you may lose settings.";
+        event.returnValue = reloadMessage;
+        return reloadMessage;
+    });
 	//////////////////////////////////////////////////////////////
 	//  					    FORMS							//
 	//////////////////////////////////////////////////////////////
@@ -199,14 +216,12 @@ $(document).ready( function() {
         if(/^(rtsp):\/\/[^ "]+$/.test(uri)){
             lmsInput = {
                 'params'    : {
-                    "progName"  : "LiveMediaStreamer",
-                    "id"        : "100",
                     "uri"       : uri
                 }
             };  
             addAlertSuccess('Success setting network input params');
 
-            setReceiverToSplitter();
+            setReceiverToSplitterRTMP();
             createFilter(transmitterId, "transmitter");
             $("#view").load("./app/views/splitter.html", function(res, stat, xhr) {
                 if(stat="succes"){
@@ -260,9 +275,112 @@ $(document).ready( function() {
                         }
                     };
                     addAlertSuccess('Success setting network input params');
-
-                    setReceiverToSplitter();
+                    createFilter(receiverId, "receiver");
+                    setReceiverToSplitter(form.find( "input[name='rtpInput']" ).val());
                     createFilter(transmitterId, "transmitter");
+                    $("#view").load("./app/views/splitter.html", function(res, stat, xhr) {
+                        if(stat="succes"){
+                            getState();
+                            var content = document.getElementById('contentCrop');
+                            var spinner = new Spinner().spin();
+                            content.appendChild(spinner.el);
+                            for(var filterIn in lmsState.filters){
+                                if (lmsState.filters[filterIn].type == "videoDecoder"){
+                                    while(Number(lmsState.filters[filterIn].inputInfo.height)==0){
+                                        getState();
+                                    }
+                                    content.removeChild(spinner.el);
+                                    inputWidth = Number(lmsState.filters[filterIn].inputInfo.width);
+                                    inputHeight = Number(lmsState.filters[filterIn].inputInfo.height);
+                                    var grid = document.getElementById('grid-snap');
+                                    winWidth = $("#grid-snap").width();
+                                    winHeight=((inputHeight*winWidth)/inputWidth).toFixed(0);
+                                    grid.style.height= winHeight+'px';
+                                    break;
+                                }
+                            }
+                        }
+                    });
+                }
+                break;
+            case 'a':
+                var aport = form.find( "input[name='port']" ).val();
+                if(form.find( "select[name='codec']" ).val() === "none" 
+                    || form.find( "select[name='sampleRate']" ).val() === "none" 
+                    || form.find( "select[name='channels']" ).val() === "none"
+                    || isNaN(aport)){
+                        lmsInput = null;
+                        addAlertError('ERROR: no valid inputs... please check.');
+                } else {
+                    lmsInput = {
+                        'params'    : {
+                            "subsessions":[
+                                {
+                                    "medium":"audio",
+                                    "codec":form.find( "select[name='codec']" ).val(),
+                                    "bandwidth":192000,
+                                    "timeStampFrequency":parseInt(form.find( "select[name='sampleRate']" ).val()),
+                                    "channels":parseInt(form.find( "select[name='channels']" ).val()),
+                                    "port":parseInt(aport),
+                                }   
+                            ]
+                        }
+                    };
+                    addAlertSuccess('Success setting network input params');
+
+                    createFilter(receiverId, "receiver");
+                    createFilter(transmitterId, "transmitter");
+                    setReceiverToTransmitterAudio(form.find( "input[name='rtpInput']" ).val());
+
+                    $("#view").load("./app/views/splitter.html", function(res, stat, xhr) {
+                    });
+                }
+                break;
+            case 'av':
+                var aport = form.find( "input[name='audio-port']" ).val();
+                var vport = form.find( "input[name='video-port']" ).val();
+                if(form.find( "select[name='audio-codec']" ).val() === "none" 
+                    || form.find( "select[name='video-codec']" ).val() === "none"
+                    || form.find( "select[name='sampleRate']" ).val() === "none" 
+                    || form.find( "select[name='channels']" ).val() === "none"
+                    || isNaN(aport)
+                    || isNaN(vport)){
+                        lmsInput = null;
+                        addAlertError('ERROR: no valid inputs... please check.');
+                } else {
+                    lmsInput = {
+                        'audioParams'    : {
+                            "subsessions":[
+                                {
+                                    "medium":"audio",
+                                    "codec":form.find( "select[name='audio-codec']" ).val(),
+                                    "bandwidth":192000,
+                                    "timeStampFrequency":parseInt(form.find( "select[name='sampleRate']" ).val()),
+                                    "channels":parseInt(form.find( "select[name='channels']" ).val()),
+                                    "port":parseInt(aport),
+                                }   
+                            ]
+                        },
+                        'videoParams'    : {
+                            "subsessions":[
+                                {
+                                    "medium":"video",
+                                    "codec":form.find( "select[name='video-codec']" ).val(),
+                                    "bandwidth":5000,
+                                    "timeStampFrequency":90000,
+                                    "channels":null,
+                                    "port":parseInt(vport),
+                                }   
+                            ]
+                        }
+                    };
+                    addAlertSuccess('Success setting network input params');
+
+                    createFilter(receiverId, "receiver");
+                    createFilter(transmitterId, "transmitter");
+                    setReceiverToTransmitterAudio(form.find( "input[name='rtpInput']" ).val());
+                    setReceiverToSplitter(form.find( "input[name='rtpInput']" ).val());
+
                     $("#view").load("./app/views/splitter.html", function(res, stat, xhr) {
                         if(stat="succes"){
                             getState();
@@ -478,26 +596,92 @@ $(document).ready( function() {
      	++encoderId;
     };
 
-	function setReceiverToSplitter(){
-		createFilter(receiverId, "receiver");
-		configureFilter(receiverId, 'addSession', lmsInput.params);
-		createFilter(decoderId, "videoDecoder");
-		createFilter(resamplerId, "videoResampler");
-		var lmsResampler = {
+	function setReceiverToSplitter(rtpType){
+        createFilter(decoderId, "videoDecoder");
+        createFilter(resamplerId, "videoResampler");
+        var lmsResampler = {
                         'params'    : {
                             "width":0,
-				            "height":0,
-				            "discartPeriod":0,
-				            "pixelFormat":0
+                            "height":0,
+                            "discartPeriod":0,
+                            "pixelFormat":0
                         }
                     };
-		configureFilter(resamplerId, "configure", lmsResampler.params);
-		createFilter(videoSplitterId, "videoSplitter");
-		var midFiltersIds = [decoderId,resamplerId];
-		createPath(lmsInput.params.subsessions[0].port, receiverId, videoSplitterId, lmsInput.params.subsessions[0].port, -1, midFiltersIds);
-		
+        configureFilter(resamplerId, "configure", lmsResampler.params);
+        createFilter(videoSplitterId, "videoSplitter");
+        var midFiltersIds = [decoderId,resamplerId];
+
+        switch(rtpType){
+            case 'v':
+                configureFilter(receiverId, 'addSession', lmsInput.params);
+                createPath(lmsInput.params.subsessions[0].port, receiverId, videoSplitterId, lmsInput.params.subsessions[0].port, -1, midFiltersIds);
+                break;
+            case 'av':
+                configureFilter(receiverId, 'addSession', lmsInput.videoParams);
+                createPath(lmsInput.videoParams.subsessions[0].port, receiverId, videoSplitterId, lmsInput.videoParams.subsessions[0].port, -1, midFiltersIds);
+                break;
+        }
 		++resamplerId;
 	};
+
+    function setReceiverToSplitterRTMP(){
+        createFilter(receiverId, "receiver");
+        configureFilter(receiverId, 'configure', lmsInput.params);
+        createFilter(decoderId, "videoDecoder");
+        createFilter(resamplerId, "videoResampler");
+        var lmsResampler = {
+                        'params'    : {
+                            "width":0,
+                            "height":0,
+                            "discartPeriod":0,
+                            "pixelFormat":0
+                        }
+                    };
+        configureFilter(resamplerId, "configure", lmsResampler.params);
+        createFilter(videoSplitterId, "videoSplitter");
+        var midFiltersIds = [decoderId,resamplerId];
+        createPath(lmsInput.params.subsessions[0].port, receiverId, videoSplitterId, lmsInput.params.subsessions[0].port, -1, midFiltersIds);
+        
+        ++resamplerId;
+    };
+    
+    function setReceiverToTransmitterAudio(rtpType){
+        
+        var midFiltersIds = [];
+        switch(rtpType){
+            case 'a':
+                configureFilter(receiverId, 'addSession', lmsInput.params);
+                createPath(lmsInput.params.subsessions[0].port, receiverId, transmitterId, lmsInput.params.subsessions[0].port, lmsInput.params.subsessions[0].port, midFiltersIds);
+                var plainrtp = "plainrtp" + lmsInput.params.subsessions[0].port;
+                var lmsTransmitter = {
+                                'params'    : {
+                                    "id":lmsInput.params.subsessions[0].port,
+                                    "txFormat":"std",
+                                    "name":plainrtp,
+                                    "info":plainrtp,
+                                    "desc":plainrtp,
+                                    "readers":[lmsInput.params.subsessions[0].port]
+                                }
+                            };
+                break;
+            case 'av':
+                configureFilter(receiverId, 'addSession', lmsInput.audioParams);
+                createPath(lmsInput.audioParams.subsessions[0].port, receiverId, transmitterId, lmsInput.audioParams.subsessions[0].port, lmsInput.audioParams.subsessions[0].port, midFiltersIds);
+                var plainrtp = "plainrtp" + lmsInput.audioParams.subsessions[0].port;
+                var lmsTransmitter = {
+                                'params'    : {
+                                    "id":lmsInput.audioParams.subsessions[0].port,
+                                    "txFormat":"std",
+                                    "name":plainrtp,
+                                    "info":plainrtp,
+                                    "desc":plainrtp,
+                                    "readers":[lmsInput.audioParams.subsessions[0].port]
+                                }
+                            };
+                break;
+        }
+        configureFilter(transmitterId, "addRTSPConnection", lmsTransmitter.params);
+    };
 
     //////////////////////////////////////////////////////////////
 	//  				SPECIFIC API METHODS					//
