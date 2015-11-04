@@ -180,7 +180,7 @@ $(document).ready( function() {
             };   
             addAlertSuccess('Success setting network input params');
 
-            setReceiverToSplitter();
+            setReceiverToSplitterRTMP();
             createFilter(transmitterId, "transmitter");
             $("#view").load("./app/views/splitter.html", function(res, stat, xhr) {
                 if(stat="succes"){
@@ -216,12 +216,14 @@ $(document).ready( function() {
         if(/^(rtsp):\/\/[^ "]+$/.test(uri)){
             lmsInput = {
                 'params'    : {
-                    "uri"       : uri
+                    "uri"       : uri,
+                    "progName"  : "LiveMediaStreamer",
+                    "id": "8554"
                 }
             };  
             addAlertSuccess('Success setting network input params');
 
-            setReceiverToSplitterRTMP();
+            setReceiverToSplitterRTSP();
             createFilter(transmitterId, "transmitter");
             $("#view").load("./app/views/splitter.html", function(res, stat, xhr) {
                 if(stat="succes"){
@@ -419,6 +421,7 @@ $(document).ready( function() {
     		'id' : idCrops,
             'outputResolutionWidth' : Number(form.find( "input[id='resolution-width']" ).val()),
             'outputResolutionHeight' : Number(form.find( "input[id='resolution-height']" ).val()),
+            'ip' : form.find( "input[id='ip-destination']" ).val(),
             'x' : 0,
             'y' : 0,
             'width' : (winWidth/2).toFixed(0),
@@ -578,7 +581,7 @@ $(document).ready( function() {
                         }
                     };
 		configureFilter(videoSplitterId, "configCrop", lmsSplitter.params);
-		//CONFIGURE TRANSMITTER
+		//CONFIGURE TRANSMITTER RTSP
         var plainrtp = "plainrtp" + idCrops;
 		var lmsTransmitter = {
                         'params'    : {
@@ -591,6 +594,17 @@ $(document).ready( function() {
                         }
                     };
 		configureFilter(transmitterId, "addRTSPConnection", lmsTransmitter.params);
+        //CONFIGURE TRANSMITTER RTP
+        lmsTransmitter = {
+                        'params'    : {
+                            "id":idCrops*100,
+                            "txFormat":"std",
+                            "ip":message.ip,
+                            "port":5006,
+                            "readers":[idCrops]
+                        }
+                    };
+        configureFilter(transmitterId, "addRTPConnection", lmsTransmitter.params);
      	++pathTransmitterId;
      	++resamplerId;
      	++encoderId;
@@ -641,6 +655,27 @@ $(document).ready( function() {
         createFilter(videoSplitterId, "videoSplitter");
         var midFiltersIds = [decoderId,resamplerId];
         createPath(lmsInput.params.subsessions[0].port, receiverId, videoSplitterId, lmsInput.params.subsessions[0].port, -1, midFiltersIds);
+        
+        ++resamplerId;
+    };
+
+    function setReceiverToSplitterRTSP(){
+        createFilter(receiverId, "receiver");
+        configureFilter(receiverId, 'addSession', lmsInput.params);
+        createFilter(decoderId, "videoDecoder");
+        createFilter(resamplerId, "videoResampler");
+        var lmsResampler = {
+                        'params'    : {
+                            "width":0,
+                            "height":0,
+                            "discartPeriod":0,
+                            "pixelFormat":0
+                        }
+                    };
+        configureFilter(resamplerId, "configure", lmsResampler.params);
+        createFilter(videoSplitterId, "videoSplitter");
+        var midFiltersIds = [decoderId,resamplerId];
+        createPath(8554, receiverId, videoSplitterId, 8554, -1, midFiltersIds);
         
         ++resamplerId;
     };
