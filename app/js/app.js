@@ -31,6 +31,8 @@ $(document).ready( function() {
     	transmitterId = 1500,
     	pathTransmitterId = 2000;
 
+    var data = "text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(listCrops));
+
     //////////////////////////////////////////////////////////////
     //                       EVENTS MANAGMENT                   //
     //////////////////////////////////////////////////////////////
@@ -83,7 +85,7 @@ $(document).ready( function() {
         }
     });
 
-    $('#disconnectButton').on('click', function(event) {
+    $('#disconnect').on('click', function(event) {
         bootbox.confirm("Are you sure to disconnect? This implies restarting the app...", function(result) {
             if(result){
                 var uri = apiURI + '/disconnect';
@@ -104,10 +106,10 @@ $(document).ready( function() {
                             apiURI = null;
                             sHost = null;
                             sPort = null;
-                            $("#disconnectButton").addClass("hidden");
-                            $("#configureCropForm").removeClass("hidden");
-                            $("#deleteCrop").removeClass("hidden");
-                            $("#configureAllCrops").removeClass("hidden");
+                            $("#disconnect").addClass("hidden");
+                            $("#collapseButton").addClass("hidden");                            
+                            $("#saveConfig").addClass("hidden");                            
+                            $("#openConfig").addClass("hidden");                            
                             $("#state").html('');
                             $("#view").load("./app/views/instance.html");
                         } else {
@@ -122,11 +124,89 @@ $(document).ready( function() {
         });
     });
 
+    $('#saveConfig').on('click', function(event){
+        console.log("Save Config");
+        var data = "text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(listCrops));
+        var file = document.createElement('a');
+        file.href = 'data:' + data;
+    });
+
+    $('#openConfig').on('click', function(event){
+        console.log("Open Config");
+        $("#selector-files").click();
+    });
+
+    $("#selector-files").change(function () {
+        
+        var file=$(this).val();
+        if (!file) return;
+        console.log(file);
+
+        
+    });
+
     window.addEventListener("beforeunload", function(event){
         event  = event || window.event;
         var reloadMessage = "\tALERT: If you refresh this page, you may lose settings.";
         event.returnValue = reloadMessage;
         return reloadMessage;
+    });
+
+    $(window).resize(function(){
+        var grid = document.getElementById('grid-snap');
+        var nWinWidth = Number($("#grid-snap").width());
+        var nWinHeight=Number(((inputHeight*nWinWidth)/inputWidth).toFixed(0));
+        
+        for(crop in listCrops){
+            var div = document.getElementById('crop' + listCrops[crop].id);
+            var nWidth = Number((div.style.width.replace(/\D/g,''))*(nWinWidth/winWidth)).toFixed(0);
+            var nHeight = Number((div.style.height.replace(/\D/g,''))*(nWinHeight/winHeight)).toFixed(0);
+            var x = ((parseInt(div.getAttribute('data-x')) || 0)*(nWinWidth/winWidth)).toFixed(0);
+            var y = ((parseInt(div.getAttribute('data-y')) || 0)*(nWinHeight/winHeight)).toFixed(0);
+
+            grid.style.height= nWinHeight+'px';
+            div.style.maxWidth = nWinWidth + "px";
+            div.style.maxHeight = nWinHeight + "px";
+            div.style.width = nWidth + "px";
+            div.style.height = nHeight + "px";
+            div.setAttribute('data-x', x);
+            div.setAttribute('data-y', y);
+        }
+        winWidth = nWinWidth;
+        winHeight=nWinHeight;
+        for(crop in listCrops){
+            var div = document.getElementById('crop' + listCrops[crop].id);
+            setCrop(div);
+        }
+        
+    });
+
+    window.addEventListener('orientationchange', function(){
+        var grid = document.getElementById('grid-snap');
+        var nWinWidth = Number($("#grid-snap").width());
+        var nWinHeight=Number(((inputHeight*nWinWidth)/inputWidth).toFixed(0));
+        grid.style.height= nWinHeight+'px';
+        for(crop in listCrops){
+            var div = document.getElementById('crop' + listCrops[crop].id);
+            var nWidth = Number((div.style.width.replace(/\D/g,''))*(nWinWidth/winWidth)).toFixed(0);
+            var nHeight = Number((div.style.height.replace(/\D/g,''))*(nWinHeight/winHeight)).toFixed(0);
+            var x = ((parseInt(div.getAttribute('data-x')) || 0)*(nWinWidth/winWidth)).toFixed(0);
+            var y = ((parseInt(div.getAttribute('data-y')) || 0)*(nWinHeight/winHeight)).toFixed(0);
+
+            div.style.maxWidth = nWinWidth + "px";
+            div.style.maxHeight = nWinHeight + "px";
+            div.style.width = nWidth + "px";
+            div.style.height = nHeight + "px";
+            div.setAttribute('data-x', x);
+            div.setAttribute('data-y', y);
+        }
+        winWidth = nWinWidth;
+        winHeight=nWinHeight;
+        for(crop in listCrops){
+            var div = document.getElementById('crop' + listCrops[crop].id);
+            setCrop(div);
+        }
+        
     });
 	//////////////////////////////////////////////////////////////
 	//  					    FORMS							//
@@ -155,7 +235,9 @@ $(document).ready( function() {
                     addAlertSuccess(msg.message);
                     apiURI = 'http://'+apiHost+':'+apiPort+'/api';
                     console.log(apiURI);
-                    $("#disconnectButton").removeClass("hidden");
+                    $("#disconnect").removeClass("hidden");
+                    $("#openConfig").removeClass("hidden");
+                    $("#collapseButton").removeClass("hidden");
                     $("#view").load("./app/views/input.html");
                 } else {
                     lmsInstance = null;
@@ -197,8 +279,8 @@ $(document).ready( function() {
                             inputWidth = Number(lmsState.filters[filterIn].inputInfo.width);
                             inputHeight = Number(lmsState.filters[filterIn].inputInfo.height);
                             var grid = document.getElementById('grid-snap');
-                            winWidth = $("#grid-snap").width();
-                            winHeight=((inputHeight*winWidth)/inputWidth).toFixed(0);
+                            winWidth = Number($("#grid-snap").width());
+                            winHeight=Number(((inputHeight*winWidth)/inputWidth).toFixed(0));
                             grid.style.height= winHeight+'px';
                             break;
                         }
@@ -240,7 +322,7 @@ $(document).ready( function() {
                             inputWidth = Number(lmsState.filters[filterIn].inputInfo.width);
                             inputHeight = Number(lmsState.filters[filterIn].inputInfo.height);
                             var grid = document.getElementById('grid-snap');
-                            winWidth = $("#grid-snap").width();
+                            winWidth = Number($("#grid-snap").width());
                             winHeight=((inputHeight*winWidth)/inputWidth).toFixed(0);
                             grid.style.height= winHeight+'px';
                             break;
@@ -295,8 +377,8 @@ $(document).ready( function() {
                                     inputWidth = Number(lmsState.filters[filterIn].inputInfo.width);
                                     inputHeight = Number(lmsState.filters[filterIn].inputInfo.height);
                                     var grid = document.getElementById('grid-snap');
-                                    winWidth = $("#grid-snap").width();
-                                    winHeight=((inputHeight*winWidth)/inputWidth).toFixed(0);
+                                    winWidth = Number($("#grid-snap").width());
+                                    winHeight=Number(((inputHeight*winWidth)/inputWidth).toFixed(0));
                                     grid.style.height= winHeight+'px';
                                     break;
                                 }
@@ -398,8 +480,8 @@ $(document).ready( function() {
                                     inputWidth = Number(lmsState.filters[filterIn].inputInfo.width);
                                     inputHeight = Number(lmsState.filters[filterIn].inputInfo.height);
                                     var grid = document.getElementById('grid-snap');
-                                    winWidth = $("#grid-snap").width();
-                                    winHeight=((inputHeight*winWidth)/inputWidth).toFixed(0);
+                                    winWidth = Number($("#grid-snap").width());
+                                    winHeight=Number(((inputHeight*winWidth)/inputWidth).toFixed(0));
                                     grid.style.height= winHeight+'px';
                                     break;
                                 }
@@ -417,56 +499,106 @@ $(document).ready( function() {
 
 
     function createCropForm(form){
-    	var message = { 
-    		'id' : idCrops,
-            'outputResolutionWidth' : Number(form.find( "input[id='resolution-width']" ).val()),
-            'outputResolutionHeight' : Number(form.find( "input[id='resolution-height']" ).val()),
-            'ip' : form.find( "input[id='ip-destination']" ).val(),
-            'x' : 0,
-            'y' : 0,
-            'width' : (winWidth/2).toFixed(0),
-            'height' : (winHeight/2).toFixed(0),
-            'pathId': pathTransmitterId
-        };
-        $('#crop_modal').modal('hide');
-        
-        var grid = document.getElementById('grid-snap');
-        var div = document.createElement('div');
-        
-        div.id = 'crop' + idCrops;
-    	div.className = 'outputCrop';
-    	div.style.maxWidth = winWidth + "px";
-    	div.style.maxHeight = winHeight + "px";
-        div.style.width = message.width + "px";
-        div.style.height = message.height + "px";
-    	div.innerHTML =  '#crop' + idCrops;
-     	document.getElementById('grid-snap').appendChild(div);
-     	
-        addCropToList(message);
-     	setSplitterToTransmitter(message);
-        setCrop(div);
-        if(listCrops.length==1){
-            $("#configureCropForm").removeClass("hidden");
-            $("#deleteCrop").removeClass("hidden");
+        var width,
+            height;
+        var ipval = true;
+
+        // Width y Height han de ser par para que el encoder lo pueda procesar!
+        if((winWidth/2).toFixed(0) % 2 == 1) {
+            width = Number((winWidth/2).toFixed(0)) + 1;
+        } else {
+            width = Number((winWidth/2).toFixed(0));
         }
-        if(listCrops.length>1){$("#configureAllCrops").removeClass("hidden");};
-     	++idCrops;
+
+        if((winHeight/2).toFixed(0) % 2 == 1) {
+            height = Number((winHeight/2).toFixed(0)) + 1;
+        } else {
+            height = Number((winHeight/2).toFixed(0));
+        }
+
+        for (crops in listCrops){
+            if(listCrops[crops].ip === form.find( "input[id='ip-destination']" ).val()) ipval = false;
+        }
+
+        $('#crop_modal').modal('hide');
+        if (ipval){
+        	var message = { 
+        		'id' : idCrops,
+                'ip' : form.find( "input[id='ip-destination']" ).val(),
+                'x' : 0,
+                'y' : 0,
+                'width' : width,
+                'height' : height,
+                'pathId': pathTransmitterId
+            };
+            
+            var grid = document.getElementById('grid-snap');
+            var div = document.createElement('div');
+            
+            div.id = 'crop' + idCrops;
+        	div.className = 'outputCrop';
+        	div.style.maxWidth = winWidth + "px";
+        	div.style.maxHeight = winHeight + "px";
+            div.style.minWidth = (winWidth/10) + "px";
+            div.style.minHeight = (winHeight/10) + "px";
+            div.style.width = message.width + "px";
+            div.style.height = message.height + "px";
+        	div.innerHTML =  '#crop' + idCrops;
+         	document.getElementById('grid-snap').appendChild(div);
+         	
+            addCropToList(message);
+         	setSplitterToTransmitter(message);
+            setCrop(div);
+            if(listCrops.length==1){
+                $("#configureCropForm").removeClass("hidden");
+                $("#deleteCrop").removeClass("hidden");
+            }
+            if(listCrops.length>1){$("#configureAllCrops").removeClass("hidden");};
+            $("#saveConfig").removeClass("hidden");
+            ++idCrops;
+         	
+            data = "text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(listCrops));
+            var file = document.getElementById('saveConfig');
+            file.href = 'data:' + data;
+            var date = new Date();
+            file.download = 'VideoWallConfig' + date.getFullYear() + (date.getMonth() +1) + date.getDate() + '.json';
+            
+        } else {
+            addAlertError('ERROR: This IP is currently used');
+        }
     };
 
     
 
     function configureCropForm(crop){
         var object = listCrops.filter(function(element) {return element.id == crop})[0];
+        var width,
+            height;
+        if(Number(object.width) % 2 == 1) {
+            width = Number(object.width) + 1;
+        } else {
+            width = Number(object.width);
+        }
+
+        if(Number(object.height) % 2 == 1) {
+            height = Number(object.height) + 1;
+        } else {
+            height = Number(object.height);
+        }
         var lmsSplitter = {
                         'params'    : {
                             "id": Number(object.id),
-                            "width": Number(object.width),
-                            "height":Number(object.height),
+                            "width": width,
+                            "height":height,
                             "x":Number(object.x),
                             "y":Number(object.y)
                         }
                     };
-        configureFilter(videoSplitterId, "configCrop", lmsSplitter.params);
+        data = "text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(listCrops));
+        var file = document.getElementById('saveConfig');
+        file.href = 'data:' + data;
+        var date = new Date();
+        file.download = 'VideoWallConfig' + date.getFullYear() + (date.getMonth() +1) + date.getDate() + '.json';
     };
 
     function configureFrameTimeForm(form){
@@ -540,8 +672,8 @@ $(document).ready( function() {
         createFilter(resamplerId, "videoResampler");
      	var lmsResampler = {
                         'params'    : {
-                            "width":Number(message.outputResolutionWidth),
-				            "height":Number(message.outputResolutionHeight),
+                            "width": 0,
+				            "height": 0,
 				            "discartPeriod":0,
 				            "pixelFormat":2
                         }
@@ -681,7 +813,7 @@ $(document).ready( function() {
     };
     
     function setReceiverToTransmitterAudio(rtpType){
-        
+
         var midFiltersIds = [];
         switch(rtpType){
             case 'a':
@@ -716,6 +848,7 @@ $(document).ready( function() {
                 break;
         }
         configureFilter(transmitterId, "addRTSPConnection", lmsTransmitter.params);
+        ++encoderId;
     };
 
     //////////////////////////////////////////////////////////////
@@ -952,8 +1085,25 @@ $(document).ready( function() {
                     target.style.width  = (winWidth/2).toFixed(0) + 'px';
                     target.style.height = (winHeight/2).toFixed(0) + 'px';
                 } else {
-                    target.style.width  = winWidth + 'px';
-                    target.style.height = winHeight + 'px';
+                    var maxWidth  = Number(winWidth - Number(target.getAttribute('data-x')) - target.clientWidth);
+                    var maxHeight = Number(winHeight - Number(target.getAttribute('data-y')) - target.clientHeight);
+                    console.log("DOUBLE TAP");
+                    if (maxHeight > maxWidth){
+
+                        console.log("Max Width -> height: " + Number((target.clientWidth + maxWidth)/target.clientWidth*target.clientHeight));
+                        console.log(target.clientWidth );
+                        console.log(maxWidth);
+                        console.log(target.clientHeight);
+
+                        target.style.height = Number((target.clientWidth + maxWidth)/target.clientWidth*target.clientHeight) + 'px';
+                        target.style.width  = Number(target.clientWidth + maxWidth) + 'px';
+                    } else {
+
+                        console.log("Max Height -> Width: " + Number(target.clientWidth * (target.clientHeight + maxHeight)/target.clientHeight));
+
+                        target.style.width  = Number(target.clientWidth * (target.clientHeight + maxHeight)/target.clientHeight) + 'px';
+                        target.style.height = Number(target.clientHeight + maxHeight) + 'px';
+                    }
                 }
                 setCrop(target);
                 ++layer;

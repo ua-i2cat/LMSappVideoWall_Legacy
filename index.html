@@ -13,15 +13,30 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootbox.js/4.4.0/bootbox.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/spin.js/2.3.2/spin.min.js"></script>
     <script src="https:cdnjs.cloudflare.com/ajax/libs/interact.js/1.2.6/interact.min.js"></script>
-    <script src="./app/js/interact.min.js"></script>
     <script src="./app/js/app.js"></script>
   </head>
   <body>
-    <div class="row">
-      <div class="col-sm-8 col-sm-offset-2">
-        <h1>LiveMediaStreamer API DEMO for Video Wall</h1>
+    <nav class="navbar navbar-inverse">
+      <div class="container-fluid">
+        <div class="navbar-header">                
+          <a class="navbar-brand">LiveMediaStreamer API DEMO for Video Wall</a>
+          <button type="button" class="navbar-toggle collapsed hidden" data-toggle="collapse" data-target="#navbar-collapse-dis" aria-expanded="false" id="collapseButton">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+        </div>
+        <div class="collapse navbar-collapse" id="navbar-collapse-dis">
+          <div class="nav navbar-nav navbar-right">
+            <a id="disconnect" href="#" data-bb="confirm" class="btn btn-default btn-navbar hidden"><span class="glyphicon glyphicon-stop"></span> Disconnect</a>
+            <a id="saveConfig" href="#" data-bb="confirm" class="btn btn-default btn-navbar hidden"><span class="glyphicon glyphicon-folder-close"></span> Save</a>
+            <a id="openConfig" href="#" data-bb="confirm" class="btn btn-default btn-navbar hidden" ><span class="glyphicon glyphicon-folder-open"></span> Open</a>
+            <input type="file" id="selector-files" class ="hidden"/>
+          </div>
+        </div>
       </div>
-    </div>
+    </nav>
 
     <div class="row">
       <div class="col-sm-12">
@@ -38,16 +53,6 @@
     <div class="row">
       <div class="col-sm-12">        
         <div id="success"></div>
-      </div>
-    </div>
-
-    <div class="row">
-      <div class="col-sm-12">    
-        <div class="row">
-          <div class="col-sm-12" id="disconnect">
-            <a id="disconnectButton" href="#" data-bb="confirm" class="btn btn-default hidden"><span class="glyphicon glyphicon-stop"></span> Disconnect</a>
-          </div>
-        </div>
       </div>
     </div>
   </body>
