@@ -79,6 +79,9 @@ $(document).ready( function() {
                 break;
             case 'configureFrameTimeForm':
                 configureFrameTimeForm(form);
+                break;
+            case 'playRTP':
+                playRTP();
                 break; 
             default:
                 addAlertError('ERROR: no form available');
@@ -594,6 +597,7 @@ $(document).ready( function() {
                             "y":Number(object.y)
                         }
                     };
+        configureFilter(videoSplitterId, "configCrop", lmsSplitter.params);
         data = "text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(listCrops));
         var file = document.getElementById('saveConfig');
         file.href = 'data:' + data;
@@ -626,6 +630,12 @@ $(document).ready( function() {
             document.getElementById('height-crop').textContent ="";
         }
 
+    };
+
+    function playRTP(){
+        for(crop in listCrops){
+            setPlayUrl(listCrops[crop].ip);
+        }
     };
     //////////////////////////////////////////////////////////////
 	//  			SPECIFIC SCENARIO/UI METHODS				//
@@ -687,8 +697,8 @@ $(document).ready( function() {
                             "bitrate":1000,
 				            "fps":25,
 				            "gop":25,
-				            "lookahead":50,
-				            "threads":6,
+				            "lookahead":0,
+				            "threads":4,
 				            "annexb":true,
 				            "preset":"superfast"
                         }
@@ -714,7 +724,7 @@ $(document).ready( function() {
                     };
 		configureFilter(videoSplitterId, "configCrop", lmsSplitter.params);
 		//CONFIGURE TRANSMITTER RTSP
-        var plainrtp = "plainrtp" + idCrops;
+        /*var plainrtp = "plainrtp" + idCrops;
 		var lmsTransmitter = {
                         'params'    : {
                             "id":idCrops,
@@ -725,7 +735,7 @@ $(document).ready( function() {
 				            "readers":[idCrops]
                         }
                     };
-		configureFilter(transmitterId, "addRTSPConnection", lmsTransmitter.params);
+		configureFilter(transmitterId, "addRTSPConnection", lmsTransmitter.params);*/
         //CONFIGURE TRANSMITTER RTP
         lmsTransmitter = {
                         'params'    : {
@@ -999,7 +1009,35 @@ $(document).ready( function() {
                 return false;
             }
         })        
-    }; 
+    };
+
+    function setPlayUrl(ip) {
+        var uriPlay = 'http://'+ip+':'+'8080/api';
+        var message = {type: "master"}; 
+        $.ajax({
+            type: 'POST',
+            async: false,
+            url: uriPlay,
+            data: JSON.stringify(message),
+            contentType: "application/json; charset=utf-8",
+            traditional: true,
+            success : function(msg) {
+                if(!msg.error){
+                    console.log("PLAY");
+                    console.log(msg);
+                    okmsg = true;
+                } else {
+                    console.log(msg.error);
+                }
+            },
+            error : function(xhr, msg) {
+                console.log('ERROR: \
+                ' + msg + ' - ' + xhr.responseText+ ' - No API available');
+            }
+        })
+
+        return okmsg;
+    };
 
     //////////////////////////////////////////////////////////////
 	//  					ALERTS METHODS						//

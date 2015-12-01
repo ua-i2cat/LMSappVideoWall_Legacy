@@ -10,7 +10,7 @@
 			<div class="form-group form-group-little">
 				<label class="col-sm-2 control-label">Crop</label>
 			    <div class="col-sm-3 col-form-crops">	
-			    	<label  id="select-crop" class="form-control form-control-little">
+			    	<label  id="select-crop" class="form-control form-control-little"></label>
 			    </div>	
 				<label class="col-sm-1 control-label">X</label>
 			    <div class="col-sm-2 col-form-crops">	
@@ -32,17 +32,17 @@
 			    </div>	
 			</div>
 			<div class="form-group form-group-little"> 
-			    <input id="configureBtn" type="submit" class="btn btn-default btn-crops" value="Configure Selected Crop">
+			    <input id="configureBtn" type="submit" class="btn btn-default btn-crops" value="Configure Selected Crop"/>
 			</div>
 		</form>
 		<form class="form-horizontal hidden" role="form" id="deleteCrop">
 			<div class="form-group form-group-little">
-				<input id="deleteCropBtn" type="submit" class="btn btn-default btn-crops" value ="Delete Selected Crop">
+				<input id="deleteCropBtn" type="submit" class="btn btn-default btn-crops" value ="Delete Selected Crop"/>
 			</div>
 		</form>
 		<form class="form-horizontal hidden" role="form" id="configureAllCrops">
 			<div class="form-group form-group-little">
-				<input id="configAllCropsBtn" type="submit" class="btn btn-default btn-crops" value ="Configure All Crops">
+				<input id="configAllCropsBtn" type="submit" class="btn btn-default btn-crops" value ="Configure All Crops"/>
 			</div>
 		</form>
 		<br>
@@ -51,11 +51,11 @@
 			<div class="form-group form-group-little">
 				<label class="col-sm-4 control-label">Frame Time</label>
 			    <div class="col-sm-7">	
-			    	<input type="text" id="frame-time" class="form-control">
+			    	<input type="text" id="frame-time" class="form-control"/>
 			    </div>	
 			</div>
 			<div class="form-group form-group-little"> 
-			    <input id="configureFrameTimeBtn" type="submit" class="btn btn-default btn-crops" value="Configure Frame Time"></input>
+			    <input id="configureFrameTimeBtn" type="submit" class="btn btn-default btn-crops" value="Configure Frame Time"/>
 			</div>
 		</form>
 	</div>
@@ -63,8 +63,13 @@
 	<div class="col-sm-8" id="contentCrop">
 		<div id="grid-snap"></div>
 	</div>
-
 </div> 
+
+<div class="row">
+	<form class="form-horizontal" role="form" id="playRTP">
+		<input id="play" type="submit" class="btn btn-default" value="Play"/>
+	</form>
+</div>
 
 <div class="modal fade" id="crop_modal">
 	<div class="modal-dialog">
