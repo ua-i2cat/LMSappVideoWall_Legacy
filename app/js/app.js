@@ -6,6 +6,8 @@ $(document).ready( function() {
 	
 	var sHost = null, 
 		sPort = null;
+
+    var portRTP = 5006;
 	
     var inputWidth = 0,
         inputHeight =0,
@@ -82,6 +84,9 @@ $(document).ready( function() {
                 break;
             case 'playRTP':
                 playRTP();
+                break;
+            case 'forceIntra':
+                forceIntra();
                 break; 
             default:
                 addAlertError('ERROR: no form available');
@@ -502,26 +507,10 @@ $(document).ready( function() {
 
 
     function createCropForm(form){
-        var width,
-            height;
+        var width = 0.5,
+            height = 0.5;
         var ipval = true;
 
-        // Width y Height han de ser par para que el encoder lo pueda procesar!
-        if((winWidth/2).toFixed(0) % 2 == 1) {
-            width = Number((winWidth/2).toFixed(0)) + 1;
-        } else {
-            width = Number((winWidth/2).toFixed(0));
-        }
-
-        if((winHeight/2).toFixed(0) % 2 == 1) {
-            height = Number((winHeight/2).toFixed(0)) + 1;
-        } else {
-            height = Number((winHeight/2).toFixed(0));
-        }
-
-        for (crops in listCrops){
-            if(listCrops[crops].ip === form.find( "input[id='ip-destination']" ).val()) ipval = false;
-        }
 
         $('#crop_modal').modal('hide');
         if (ipval){
@@ -544,8 +533,8 @@ $(document).ready( function() {
         	div.style.maxHeight = winHeight + "px";
             div.style.minWidth = (winWidth/10) + "px";
             div.style.minHeight = (winHeight/10) + "px";
-            div.style.width = message.width + "px";
-            div.style.height = message.height + "px";
+            div.style.width = (message.width * winWidth) + "px";
+            div.style.height = (message.height * winHeight)  + "px";
         	div.innerHTML =  '#crop' + idCrops;
          	document.getElementById('grid-snap').appendChild(div);
          	
@@ -588,15 +577,17 @@ $(document).ready( function() {
         } else {
             height = Number(object.height);
         }
+
         var lmsSplitter = {
                         'params'    : {
                             "id": Number(object.id),
-                            "width": width,
-                            "height":height,
-                            "x":Number(object.x),
-                            "y":Number(object.y)
+                            "width": width/inputWidth,
+                            "height":height/inputHeight,
+                            "x":Number(object.x/inputWidth),
+                            "y":Number(object.y/inputHeight)
                         }
                     };
+        console.log(lmsSplitter);
         configureFilter(videoSplitterId, "configCrop", lmsSplitter.params);
         data = "text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(listCrops));
         var file = document.getElementById('saveConfig');
@@ -636,6 +627,12 @@ $(document).ready( function() {
         for(crop in listCrops){
             setPlayUrl(listCrops[crop].ip);
         }
+    };
+
+    function forceIntra(){
+        var lmsEncoder = {'params':{}};
+        configureFilter(1401, "forceIntra", lmsEncoder.params);
+        configureFilter(1402, "forceIntra", lmsEncoder.params);
     };
     //////////////////////////////////////////////////////////////
 	//  			SPECIFIC SCENARIO/UI METHODS				//
@@ -703,7 +700,7 @@ $(document).ready( function() {
 				            "preset":"superfast"
                         }
                     };
-     	configureFilter(encoderId, "configure", lmsEncoder.params);
+        configureFilter(encoderId, "configure", lmsEncoder.params);
      	
         //CREATE PATH
         var midFiltersIds = [resamplerId, encoderId];
@@ -715,16 +712,16 @@ $(document).ready( function() {
     	
      	var lmsSplitter = {
                         'params'    : {
-                            "id": Number(object.id),
-                            "width": Number(object.width),
-                            "height":Number(object.height),
-                            "x":Number(object.x),
-                            "y":Number(object.y)
+                            "id": Number(message.id),
+                            "width": Number(message.width),
+                            "height":Number(message.height),
+                            "x":Number(message.x),
+                            "y":Number(message.y)
                         }
                     };
 		configureFilter(videoSplitterId, "configCrop", lmsSplitter.params);
 		//CONFIGURE TRANSMITTER RTSP
-        /*var plainrtp = "plainrtp" + idCrops;
+        var plainrtp = "plainrtp" + idCrops;
 		var lmsTransmitter = {
                         'params'    : {
                             "id":idCrops,
@@ -735,21 +732,22 @@ $(document).ready( function() {
 				            "readers":[idCrops]
                         }
                     };
-		configureFilter(transmitterId, "addRTSPConnection", lmsTransmitter.params);*/
+		configureFilter(transmitterId, "addRTSPConnection", lmsTransmitter.params);
         //CONFIGURE TRANSMITTER RTP
-        lmsTransmitter = {
+        /*lmsTransmitter = {
                         'params'    : {
                             "id":idCrops*100,
                             "txFormat":"std",
                             "ip":message.ip,
-                            "port":5006,
+                            "port":portRTP,
                             "readers":[idCrops]
                         }
                     };
-        configureFilter(transmitterId, "addRTPConnection", lmsTransmitter.params);
+        configureFilter(transmitterId, "addRTPConnection", lmsTransmitter.params);*/
      	++pathTransmitterId;
      	++resamplerId;
      	++encoderId;
+        portRTP = portRTP + 2;
     };
 
 	function setReceiverToSplitter(rtpType){
@@ -796,9 +794,19 @@ $(document).ready( function() {
         configureFilter(resamplerId, "configure", lmsResampler.params);
         createFilter(videoSplitterId, "videoSplitter");
         var midFiltersIds = [decoderId,resamplerId];
-        createPath(lmsInput.params.subsessions[0].port, receiverId, videoSplitterId, lmsInput.params.subsessions[0].port, -1, midFiltersIds);
-        
-        ++resamplerId;
+        getState();
+        var count = 0;
+        while (lmsState.filters[0].sessions.length == 0 && count < 100 ){
+            getState();
+            count++;
+        }
+        if (count < 100){
+            console.log(lmsState.filters[0].sessions[0].subsessions[0]);
+            createPath(lmsState.filters[0].sessions[0].subsessions[0].port, receiverId, videoSplitterId, lmsState.filters[0].sessions[0].subsessions[0].port, -1, midFiltersIds);      
+            ++resamplerId;
+        } else {
+            addAlertError("ERROR: The uri is not correct!")
+        }
     };
 
     function setReceiverToSplitterRTSP(){
@@ -814,12 +822,22 @@ $(document).ready( function() {
                             "pixelFormat":0
                         }
                     };
+
         configureFilter(resamplerId, "configure", lmsResampler.params);
         createFilter(videoSplitterId, "videoSplitter");
         var midFiltersIds = [decoderId,resamplerId];
-        createPath(8554, receiverId, videoSplitterId, 8554, -1, midFiltersIds);
-        
-        ++resamplerId;
+        getState();
+        var count = 0;
+        while (lmsState.filters[0].sessions.length == 0 && count < 100 ){
+            getState();
+            count++;
+        }
+        if (count < 100){
+            createPath(lmsState.filters[0].sessions[0].subsessions[0].port, receiverId, videoSplitterId, lmsState.filters[0].sessions[0].subsessions[0].port, -1, midFiltersIds);      
+            ++resamplerId;
+        } else {
+            addAlertError("ERROR: The uri is not correct!")
+        }
     };
     
     function setReceiverToTransmitterAudio(rtpType){
@@ -930,7 +948,6 @@ $(document).ready( function() {
                         'orgWriterId' : orgWriterId, 'dstReaderId' : dstReaderId, 'midFiltersIds' : midFiltersIds };
         lmsPaths.push(message);
         console.log("NEW PATH")
-        console.log(message)
         $.ajax({
             type: 'POST',
             async: false,
@@ -1014,6 +1031,7 @@ $(document).ready( function() {
     function setPlayUrl(ip) {
         var uriPlay = 'http://'+ip+':'+'8080/api';
         var message = {type: "master"}; 
+        var okmsg = false;
         $.ajax({
             type: 'POST',
             async: false,
